@@ -456,24 +456,13 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-if __name__ == '__main__':
-    print("🚀 Starting GestiCalc with Waitress Server...")
-    print("📝 Features: Live camera gestures, manual calculator")
+# ==================== LOCAL DEVELOPMENT SERVER ====================
+
+if __name__ == "__main__":
+    print("🚀 Starting GestiCalc Development Server...")
     print("🌐 Access at: http://localhost:5000")
 
-    from waitress import serve
-
     try:
-        serve(app, host='127.0.0.1', port=5000, threads=4)
+        app.run(host="0.0.0.0", port=5000, debug=True)
     except KeyboardInterrupt:
         print("\n🛑 Server stopped")
-    except Exception as e:
-        print(f"❌ Server error: {e}")
-    finally:
-        try:
-            if 'camera' in globals() and camera:
-                camera_active = False
-                camera.release()
-        except:
-            pass
-        print("🧹 Cleanup completed")

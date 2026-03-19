@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestiCalc - Hand Gesture Calculator</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10zm10 0c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .main-header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-header .lead {
+            font-size: 1.3rem;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gesture-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gesture-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .expression-display {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 1rem 0;
+            border: 2px solid #dee2e6;
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .expression-display:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .result-display {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 1rem 0;
+            border: 2px solid #2196f3;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-display.error {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .camera-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .camera-feed:hover {
+            transform: scale(1.02);
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-custom {
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-calculator {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.3rem;
+            min-width: 65px;
+            min-height: 65px;
+            border-radius: 15px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .btn-calculator:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-calculator:active {
+            transform: translateY(0);
+        }
+
+        .nav-tabs {
+            border: none;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 25px;
+            margin: 0 0.5rem;
+            padding: 0.8rem 1.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+            background: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .history-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .history-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .history-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+        }
+
+        .accordion-button {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            border-radius: 10px !important;
+            font-weight: 500;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background-color: var(--success-color);
+        }
+
+        .status-offline {
+            background-color: var(--danger-color);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .gesture-value {
+            transition: all 0.3s ease;
+        }
+
+        .performance-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .expression-display {
+                font-size: 1.5rem;
+            }
+            
+            .result-display {
+                font-size: 2rem;
+            }
+            
+            .btn-calculator {
+                min-width: 50px;
+                min-height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            .gesture-card {
+                padding: 1rem;
+            }
+
+            .performance-indicator {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 0.3rem 0.8rem;
+            }
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* ===== FULL DARK MODE PATCH START ===== */
+.dark-mode,
+.dark-mode body,
+.dark-mode .main-header,
+.dark-mode .container,
+.dark-mode .container-fluid {
+  background: #181a1b !important;
+  color: #e0e0e0 !important;
+}
+.dark-mode .gesture-card,
+.dark-mode .tab-content,
+.dark-mode .accordion-body,
+.dark-mode .alert,
+.dark-mode .result-display,
+.dark-mode .expression-display {
+  background: #232b31 !important;
+  color: #e0e0e0 !important;
+  border-color: #23272b !important;
+}
+.dark-mode .bg-light,
+.dark-mode .bg-white,
+.dark-mode .alert-light {
+  background-color: #181a1b !important;
+  color: #e0e0e0 !important;
+}
+.dark-mode .btn,
+.dark-mode .btn-custom,
+.dark-mode .btn-outline-primary,
+.dark-mode .btn-outline-secondary,
+.dark-mode .btn-outline-warning,
+.dark-mode .btn-outline-danger,
+.dark-mode .btn-outline-info {
+  background-color: #23272b !important;
+  color: #e0e0e0 !important;
+  border-color: #444 !important;
+}
+.dark-mode .btn-success, .dark-mode .btn-primary, .dark-mode .btn-danger, .dark-mode .btn-info {
+  color: #fff !important;
+}
+.dark-mode .history-item {
+  background: #23272b !important;
+  border-left: 4px solid #007bff !important;
+}
+.dark-mode .form-control,
+.dark-mode input,
+.dark-mode textarea {
+  background-color: #23272b !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+}
+.dark-mode .modal-content,
+.dark-mode .toast,
+.dark-mode .performance-indicator {
+  background: #222b31 !important;
+  color: #e0e0e0 !important;
+}
+.dark-mode .accordion-button {
+  background: #23272b !important;
+  color: #e0e0e0 !important;
+}
+.dark-mode .accordion-button:not(.collapsed) {
+  background: #2a3340 !important;
+  color: #fff !important;
+}
+/* ===== FULL DARK MODE PATCH END ===== */
+
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Performance Indicator -->
+    <div id="performanceIndicator" class="performance-indicator">
+        <span style="color: green">⚡ Ready</span>
+    </div>
+
+    <!-- Header -->
+    <div class="main-header text-center">
+        <div class="container">
+            <h1><i class="fas fa-hand-paper me-3"></i>GestiCalc</h1>
+            <p class="lead">AI-Powered Hand Gesture Calculator</p>
+            <div class="mt-3">
+                <span class="badge bg-light text-dark me-2 connection-status">
+                    <span class="status-indicator status-offline"></span>
+                    Connecting...
+                </span>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-robot me-1"></i>
+                    AI Powered
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Left Panel - Camera/Manual Section -->
+            <div class="col-lg-8 col-md-7">
+                <div class="gesture-card">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs justify-content-center" id="mainTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="camera-tab" data-bs-toggle="tab" data-bs-target="#camera" type="button">
+                                <i class="fas fa-video me-2"></i>Live Camera
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button">
+                                <i class="fas fa-keyboard me-2"></i>Manual Input
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button">
+                                <i class="fas fa-chart-line me-2"></i>Analytics
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Camera Tab -->
+                        <div class="tab-pane fade show active" id="camera">
+                            <div class="text-center mb-4">
+                                <button class="btn btn-success btn-custom me-2" onclick="startCamera()">
+                                    <i class="fas fa-play me-2"></i>Start Camera
+                                </button>
+                                <button class="btn btn-danger btn-custom me-2" onclick="stopCamera()">
+                                    <i class="fas fa-stop me-2"></i>Stop Camera
+                                </button>
+                                <button class="btn btn-info btn-custom" onclick="captureFrame()">
+                                    <i class="fas fa-camera me-2"></i>Capture
+                                </button>
+                            </div>
+                            
+                            <div class="camera-container">
+                                <img id="cameraFeed" class="camera-feed d-none" src="" alt="Camera Feed">
+                                <div class="camera-overlay bg-danger" id="cameraStatus">
+                                    <i class="fas fa-video-slash me-2"></i>Camera Offline
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <strong><i class="fas fa-info-circle me-2"></i>Tips:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>Ensure good lighting</li>
+                                            <li>Keep hands clearly visible</li>
+                                            <li>Use plain background</li>
+                                            <li>Hold gestures steady for recognition</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="gesture-card mt-4">
+  <h4>
+    <i class="fas fa-hand-paper me-2"></i>Gesture Guide
+  </h4>
+  <div class="accordion" id="gestureGuideAccordion">
+    <div class="accordion-item" style="background:none; border:none;">
+      <h2 class="accordion-header" id="singleHandHeading">
+        <button class="accordion-button" type="button" style="font-weight:600;font-size:1.2rem;" data-bs-toggle="collapse" data-bs-target="#singleHandGestures" aria-expanded="true" aria-controls="singleHandGestures">
+          <i class="fas fa-hand-point-up me-2"></i>Single Hand Gestures
+        </button>
+      </h2>
+      <div id="singleHandGestures" class="accordion-collapse collapse show" aria-labelledby="singleHandHeading" data-bs-parent="#gestureGuideAccordion">
+        <div class="accordion-body">
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Numbers:</strong><br>
+              0: Closed fist<br>
+              1: Index finger<br>
+              2: Index + Middle<br>
+              3: Index + Middle + Ring<br>
+              4: All except thumb<br>
+              5: All fingers
+            </div>
+            <div class="col-md-6">
+              <strong>Operations:</strong><br>
+              +: Thumb only<br>
+              -: Thumb + Index<br>
+              =: Pinky only<br>
+              C: Thumb + Pinky
+            </div>
+          </div>
+          <hr style="opacity:.2;"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning">
+                                        <strong><i class="fas fa-exclamation-triangle me-2"></i>Note:</strong>
+                                        <p class="mb-0 mt-2">
+                                            Allow camera permissions when prompted by your browser for live gesture recognition.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+
+                        <!-- Manual Tab -->
+                        <div class="tab-pane fade" id="manual">
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calculator"></i>
+                                        </span>
+                                        <input type="text" class="form-control" id="manualInput" 
+                                               placeholder="Enter expression (e.g., 2+3*4)" onkeypress="handleEnterKey(event)">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary btn-lg w-100 btn-custom" onclick="calculateManual()">
+                                        <i class="fas fa-equals me-2"></i>Calculate
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Virtual Calculator -->
+                            <div class="text-center">
+                                <h5 class="mb-4"><i class="fas fa-th me-2"></i>Virtual Calculator</h5>
+                                <div class="calculator-grid">
+                                    <!-- Row 1 -->
+                                    <div class="mb-2">
+                                        <button class="btn btn-outline-secondary btn-calculator" onclick="clearCalculator()">C</button>
+                                        <button class="btn btn-outline-secondary btn-calculator" onclick="addToExpression('⌫')">⌫</button>
+                                        <button class="btn btn-outline-warning btn-calculator" onclick="addToExpression('%')">%</button>
+                                        <button class="btn btn-outline-warning btn-calculator" onclick="addToExpression('/')">/</button>
+                                    </div>
+                                    
+                                    <!-- Row 2 -->
+                                    <div class="mb-2">
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('7')">7</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('8')">8</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('9')">9</button>
+                                        <button class="btn btn-outline-warning btn-calculator" onclick="addToExpression('*')">×</button>
+                                    </div>
+                                    
+                                    <!-- Row 3 -->
+                                    <div class="mb-2">
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('4')">4</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('5')">5</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('6')">6</button>
+                                        <button class="btn btn-outline-warning btn-calculator" onclick="addToExpression('-')">-</button>
+                                    </div>
+                                    
+                                    <!-- Row 4 -->
+                                    <div class="mb-2">
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('1')">1</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('2')">2</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('3')">3</button>
+                                        <button class="btn btn-outline-warning btn-calculator" onclick="addToExpression('+')">+</button>
+                                    </div>
+                                    
+                                    <!-- Row 5 -->
+                                    <div class="mb-2">
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('0')" style="width: 138px;">0</button>
+                                        <button class="btn btn-outline-primary btn-calculator" onclick="addToExpression('.')">.</button>
+                                        <button class="btn btn-success btn-calculator" onclick="calculateExpression()">=</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Keyboard Shortcuts Info -->
+                            <div class="alert alert-light mt-4">
+                                <strong><i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts:</strong>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small>
+                                            • <kbd>Ctrl + Enter</kbd> Calculate<br>
+                                            • <kbd>Ctrl + Delete</kbd> Clear
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small>
+                                            • <kbd>Escape</kbd> Stop camera<br>
+                                            • <kbd>Enter</kbd> Calculate (in input)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div class="tab-pane fade" id="analytics">
+                            <div class="row" id="analyticsContent">
+                                <div class="col-md-3">
+                                    <div class="card text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-calculator fa-2x text-primary mb-2"></i>
+                                            <h4 class="text-primary" id="totalCalculations">0</h4>
+                                            <p class="card-text">Total Calculations</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                            <h4 class="text-success" id="successfulCalculations">0</h4>
+                                            <p class="card-text">Successful</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-hand-paper fa-2x text-info mb-2"></i>
+                                            <h4 class="text-info" id="gesturesDetected">0</h4>
+                                            <p class="card-text">Gestures Detected</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                            <h4 class="text-warning" id="averageLength">0</h4>
+                                            <p class="card-text">Avg Length</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-8">
+                                    <div class="text-center">
+                                        <canvas id="analyticsChart" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6><i class="fas fa-tachometer-alt me-2"></i>Performance</h6>
+                                        </div>
+                                        <div class="card-body" id="performanceMetrics">
+                                            <div class="text-center text-muted">
+                                                <small>Loading performance data...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Calculator Display -->
+            <div class="col-lg-4 col-md-5">
+                <!-- Calculator Display -->
+                <div class="gesture-card">
+                    <h4><i class="fas fa-calculator me-2"></i>Calculator Display</h4>
+                    
+                    <!-- Expression Display -->
+                    <div class="expression-display" id="expressionDisplay">
+                        Expression: None
+                    </div>
+                    
+                    <!-- Result Display -->
+                    <div class="result-display" id="resultDisplay">
+                        Result: None
+                    </div>
+                    
+                    <!-- Current Gesture -->
+                    <div class="alert alert-info border-0" id="gestureDisplay">
+                        <i class="fas fa-hand-paper me-2"></i>
+                        <strong>Current Gesture:</strong> <span class="gesture-value">None</span>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="d-grid gap-2 mb-3">
+                        <button class="btn btn-outline-danger" onclick="clearCalculator()">
+                            <i class="fas fa-trash me-2"></i>Clear All
+                        </button>
+                        <button class="btn btn-outline-info" onclick="speakResult()">
+                            <i class="fas fa-volume-up me-2"></i>Speak Result
+                        </button>
+                    </div>
+                </div>
+
+                <!-- History Panel -->
+                <div class="gesture-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-history me-2"></i>History</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadHistory()" title="Refresh History">
+                                <i class="fas fa-refresh"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="clearHistory()" title="Clear History">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-container" id="historyDisplay">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p>No calculations yet...</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline-primary w-100 mt-2" onclick="downloadHistory()">
+                        <i class="fas fa-download me-2"></i>Download History
+                    </button>
+                </div>
+
+                
+
+    <!-- Loading Overlay -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center py-4">
+                    <div class="loading mb-3"></div>
+                    <h5>Processing...</h5>
+                    <p class="text-muted mb-0">Analyzing your gesture</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage">
+                Operation completed successfully!
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Something went wrong!
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- COMPLETE INLINE JAVASCRIPT -->
+    <script>
+        console.log('🚀 Loading GestiCalc JavaScript...');
+
+        // ==================== GLOBAL VARIABLES ====================
+        let cameraActive = false;
+        let currentGesture = null;
+        let calculationHistory = [];
+        let stateUpdateInterval;
+
+        // UI State Management
+        let uiState = {
+            isProcessing: false,
+            lastUpdateTime: 0,
+            connectionStatus: 'disconnected',
+            currentTab: 'camera'
+        };
+
+        // Performance optimization settings
+        const PERFORMANCE_CONFIG = {
+            UPDATE_INTERVAL: 200,        // ms between state updates
+            DEBOUNCE_DELAY: 300,        // ms for input debouncing
+            REQUEST_TIMEOUT: 10000,      // API request timeout
+        };
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 GestiCalc Frontend Loading...');
+            
+            // Initialize all components
+            initializeApp();
+            
+            console.log('✅ GestiCalc Frontend Loaded Successfully!');
+        });
+
+        function initializeApp() {
+            try {
+                // Load initial data
+                loadHistory();
+                updateAnalytics();
+                
+                // Setup UI components
+                setupKeyboardShortcuts();
+                setupTabHandlers();
+                setupTooltips();
+                
+                // Setup auto-refresh intervals
+                setupAutoRefresh();
+                
+                // Initialize connection status
+                checkServerConnection();
+                
+                showToast('success', 'GestiCalc initialized successfully!');
+                
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                showToast('error', 'Failed to initialize application');
+            }
+        }
+
+        // ==================== SERVER CONNECTION ====================
+        function checkServerConnection() {
+            const startTime = Date.now();
+            
+            fetch('/api/current_state', {
+                method: 'GET',
+                signal: AbortSignal.timeout(5000)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    uiState.connectionStatus = 'connected';
+                    updateConnectionStatus(true);
+                } else {
+                    throw new Error('Invalid response');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Server connection failed:', error);
+                uiState.connectionStatus = 'disconnected';
+                updateConnectionStatus(false);
+            });
+        }
+
+        function updateConnectionStatus(isConnected) {
+            const statusElements = document.querySelectorAll('.connection-status');
+            statusElements.forEach(element => {
+                if (isConnected) {
+                    element.className = 'connection-status badge bg-light text-dark me-2';
+                    element.innerHTML = '<span class="status-indicator status-online"></span>Connected';
+                } else {
+                    element.className = 'connection-status badge bg-light text-dark me-2';
+                    element.innerHTML = '<span class="status-indicator status-offline"></span>Disconnected';
+                }
+            });
+        }
+
+        // ==================== CAMERA FUNCTIONS ====================
+        async function startCamera() {
+            console.log('🎥 Start camera clicked');
+            
+            try {
+                const response = await fetch('/api/start_camera', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const cameraFeed = document.getElementById('cameraFeed');
+                    const cameraStatus = document.getElementById('cameraStatus');
+                    
+                    cameraFeed.src = '/video_feed?' + Date.now();
+                    cameraFeed.classList.remove('d-none');
+                    cameraFeed.onerror = handleCameraError;
+                    
+                    cameraStatus.innerHTML = '<i class="fas fa-video me-2"></i>Camera Online';
+                    cameraStatus.className = 'camera-overlay bg-success';
+                    
+                    cameraActive = true;
+                    startStateUpdates();
+                    updateCameraControls(true);
+                    
+                    showToast('success', 'Camera started successfully!');
+                    
+                } else {
+                    throw new Error(data.error || 'Failed to start camera');
+                }
+                
+            } catch (error) {
+                console.error('❌ Camera start error:', error);
+                showToast('error', `Camera error: ${error.message}`);
+                handleCameraError();
+            }
+        }
+
+        async function stopCamera() {
+            console.log('🛑 Stop camera clicked');
+            
+            try {
+                const response = await fetch('/api/stop_camera', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const cameraFeed = document.getElementById('cameraFeed');
+                    const cameraStatus = document.getElementById('cameraStatus');
+                    
+                    cameraFeed.classList.add('d-none');
+                    cameraFeed.src = '';
+                    
+                    cameraStatus.innerHTML = '<i class="fas fa-video-slash me-2"></i>Camera Offline';
+                    cameraStatus.className = 'camera-overlay bg-danger';
+                    
+                    cameraActive = false;
+                    stopStateUpdates();
+                    updateDisplays('', '', null);
+                    
+                    showToast('success', 'Camera stopped successfully');
+                    
+                } else {
+                    throw new Error(data.error || 'Failed to stop camera');
+                }
+                
+            } catch (error) {
+                console.error('❌ Camera stop error:', error);
+                showToast('error', `Camera stop error: ${error.message}`);
+            }
+        }
+
+        function captureFrame() {
+            if (!cameraActive) {
+                showToast('error', 'Camera is not active');
+                return;
+            }
+            
+            showToast('success', 'Frame captured successfully!');
+            console.log('📸 Frame captured at', new Date().toLocaleTimeString());
+        }
+
+        function handleCameraError() {
+            console.error('❌ Camera feed error');
+            const cameraStatus = document.getElementById('cameraStatus');
+            if (cameraStatus) {
+                cameraStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Camera Error';
+                cameraStatus.className = 'camera-overlay bg-warning';
+            }
+            showToast('error', 'Camera feed interrupted');
+        }
+
+        function updateCameraControls(isActive) {
+            const startBtn = document.querySelector('[onclick="startCamera()"]');
+            const stopBtn = document.querySelector('[onclick="stopCamera()"]');
+            const captureBtn = document.querySelector('[onclick="captureFrame()"]');
+            
+            if (startBtn) startBtn.disabled = isActive;
+            if (stopBtn) stopBtn.disabled = !isActive;
+            if (captureBtn) captureBtn.disabled = !isActive;
+        }
+
+        // ==================== REAL-TIME STATE MANAGEMENT ====================
+        function startStateUpdates() {
+            if (stateUpdateInterval) {
+                clearInterval(stateUpdateInterval);
+            }
+            
+            stateUpdateInterval = setInterval(async () => {
+                if (uiState.isProcessing) return; // Skip if currently processing
+                
+                try {
+                    const response = await fetch('/api/current_state');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateDisplays(data.expression, data.result, data.gesture);
+                        uiState.lastUpdateTime = Date.now();
+                        console.log('📊 State update:', data); // Debug line
+                    }
+                } catch (error) {
+                    console.error('State update failed:', error);
+                }
+            }, PERFORMANCE_CONFIG.UPDATE_INTERVAL);
+            
+            console.log('📡 Real-time state updates started');
+        }
+
+        function stopStateUpdates() {
+            if (stateUpdateInterval) {
+                clearInterval(stateUpdateInterval);
+                stateUpdateInterval = null;
+            }
+            console.log('📡 Real-time state updates stopped');
+        }
+
+        // ==================== CALCULATOR FUNCTIONS ====================
+        function addToExpression(token) {
+            const input = document.getElementById('manualInput');
+            if (!input) return;
+            
+            if (token === '⌫') {
+                input.value = input.value.slice(0, -1);
+            } else {
+                input.value += token;
+            }
+            
+            console.log('Added token:', token, 'Current expression:', input.value);
+        }
+
+        function validateExpression(expression) {
+            const isValid = /^[0-9+\-*/.() ]*$/.test(expression);
+            const input = document.getElementById('manualInput');
+            
+            if (input) {
+                input.classList.toggle('is-invalid', !isValid && expression.length > 0);
+            }
+            
+            return isValid;
+        }
+
+        function calculateExpression() {
+            calculateManual();
+        }
+
+        async function calculateManual() {
+            const expression = document.getElementById('manualInput')?.value?.trim();
+            
+            if (!expression) {
+                showToast('error', 'Please enter an expression');
+                return;
+            }
+            
+            if (!validateExpression(expression)) {
+                showToast('error', 'Invalid characters in expression');
+                return;
+            }
+            
+            console.log('🧮 Calculating:', expression);
+            
+            try {
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ expression: expression })
+                });
+                
+                const data = await response.json();
+                console.log('Calculation result:', data);
+                
+                if (data.success) {
+                    updateDisplays(data.expression, data.result, null);
+                    loadHistory();
+                    updateAnalytics();
+                    showToast('success', 'Calculation completed: ' + data.result);
+                } else {
+                    showToast('error', 'Calculation failed: ' + data.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ Calculation error:', error);
+                showToast('error', 'Calculation failed: ' + error.message);
+            }
+        }
+
+        async function clearCalculator() {
+            try {
+                const response = await fetch('/api/clear', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const input = document.getElementById('manualInput');
+                    if (input) {
+                        input.value = '';
+                        input.classList.remove('is-invalid');
+                    }
+                    
+                    updateDisplays('', '', null);
+                    showToast('success', 'Calculator cleared');
+                }
+                
+            } catch (error) {
+                console.error('❌ Clear error:', error);
+                showToast('error', 'Clear failed: ' + error.message);
+            }
+        }
+
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                calculateManual();
+            }
+        }
+
+        // ==================== DISPLAY MANAGEMENT ====================
+        function updateDisplays(expression, result, gesture) {
+            // Update expression display
+            const expressionDisplay = document.getElementById('expressionDisplay');
+            if (expressionDisplay) {
+                expressionDisplay.textContent = `Expression: ${expression || 'None'}`;
+                expressionDisplay.classList.toggle('animate-pulse', !!expression);
+            }
+            
+            // Update result display
+            const resultDisplay = document.getElementById('resultDisplay');
+            if (resultDisplay) {
+                resultDisplay.textContent = `Result: ${result || 'None'}`;
+                
+                resultDisplay.classList.remove('error');
+                if (result && result.toString().startsWith('Error')) {
+                    resultDisplay.classList.add('error');
+                }
+            }
+            
+            // Update gesture display
+            const gestureDisplay = document.getElementById('gestureDisplay');
+            if (gestureDisplay) {
+                const gestureText = gesture || 'None';
+                gestureDisplay.innerHTML = `
+                    <i class="fas fa-hand-paper me-2"></i>
+                    <strong>Current Gesture:</strong> 
+                    <span class="gesture-value ${gesture ? 'text-success fw-bold' : ''}">${gestureText}</span>
+                `;
+            }
+        }
+
+        // ==================== HISTORY FUNCTIONS ====================
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                
+                if (data.success) {
+                    calculationHistory = data.history;
+                    displayHistory(data.history);
+                }
+                
+            } catch (error) {
+                console.error('❌ History load error:', error);
+                displayHistory([]);
+            }
+        }
+
+        function displayHistory(history) {
+            const historyDiv = document.getElementById('historyDisplay');
+            if (!historyDiv) return;
+            
+            if (history.length === 0) {
+                historyDiv.innerHTML = `
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-history fa-3x mb-3 opacity-50"></i>
+                        <p>No calculations yet...</p>
+                        <small>Start calculating to see your history here!</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            const recentHistory = history.slice(-10).reverse();
+            
+            historyDiv.innerHTML = recentHistory.map((entry, index) => {
+                const isError = entry.result.toString().startsWith('Error');
+                const statusIcon = isError ? 'fa-times-circle text-danger' : 'fa-check-circle text-success';
+                
+                return `
+                    <div class="history-item fade-in" style="animation-delay: ${index * 0.1}s">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="fas ${statusIcon} me-2"></i>
+                                    <strong class="expression-text">${entry.expression}</strong>
+                                </div>
+                                <div class="result-text ${isError ? 'text-danger' : 'text-success'}">
+                                    = ${entry.result}
+                                </div>
+                            </div>
+                            <small class="text-muted timestamp">${entry.timestamp}</small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function clearHistory() {
+            if (!confirm('Are you sure you want to clear all calculation history?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/clear_history', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadHistory();
+                    updateAnalytics();
+                    showToast('success', 'History cleared successfully');
+                } else {
+                    showToast('error', 'Failed to clear history: ' + data.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ History clear error:', error);
+                showToast('error', 'Failed to clear history: ' + error.message);
+            }
+        }
+
+        // ==================== ANALYTICS ====================
+        async function updateAnalytics() {
+            try {
+                const response = await fetch('/api/analytics');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const analytics = data.analytics;
+                    
+                    updateMetricCard('totalCalculations', analytics.total_calculations);
+                    updateMetricCard('successfulCalculations', analytics.successful_calculations);
+                    updateMetricCard('gesturesDetected', analytics.gestures_detected);
+                    updateMetricCard('averageLength', analytics.avg_length);
+                    
+                    updateAnalyticsChart(analytics);
+                    
+                    if (analytics.performance) {
+                        updatePerformanceMetrics(analytics.performance);
+                    }
+                    
+                    console.log('📊 Analytics updated successfully');
+                }
+                
+            } catch (error) {
+                console.error('❌ Analytics error:', error);
+                ['totalCalculations', 'successfulCalculations', 'gesturesDetected', 'averageLength'].forEach(id => {
+                    updateMetricCard(id, 0);
+                });
+            }
+        }
+
+        function updateMetricCard(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        function updateAnalyticsChart(analytics) {
+            const ctx = document.getElementById('analyticsChart');
+            if (!ctx) return;
+            
+            if (window.analyticsChart) {
+                window.analyticsChart.destroy();
+            }
+            
+            window.analyticsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Successful', 'Errors'],
+                    datasets: [{
+                        data: [
+                            analytics.successful_calculations,
+                            analytics.total_calculations - analytics.successful_calculations
+                        ],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Success Rate: ${analytics.success_rate}%`,
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 20, usePointStyle: true }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePerformanceMetrics(performance) {
+            const perfDisplay = document.getElementById('performanceMetrics');
+            if (perfDisplay) {
+                perfDisplay.innerHTML = `
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted">API Success Rate</small>
+                            <div class="fw-bold text-${performance.success_rate_requests > 90 ? 'success' : 'warning'}">
+                                ${performance.success_rate_requests}%
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Avg Response</small>
+                            <div class="fw-bold text-${performance.average_processing_time < 2 ? 'success' : 'warning'}">
+                                ${performance.average_processing_time}s
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function showToast(type, message, duration = 5000) {
+            const toastId = type === 'success' ? 'successToast' : 'errorToast';
+            const messageId = type === 'success' ? 'successMessage' : 'errorMessage';
+            
+            const messageElement = document.getElementById(messageId);
+            const toastElement = document.getElementById(toastId);
+            
+            if (messageElement && toastElement) {
+                messageElement.textContent = message;
+                
+                const toast = new bootstrap.Toast(toastElement, {
+                    delay: duration,
+                    autohide: true
+                });
+                
+                toast.show();
+                console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
+            } else {
+                // Fallback to alert if toasts don't work
+                alert(`${type.toUpperCase()}: ${message}`);
+            }
+        }
+
+        function speakResult() {
+            const result = document.getElementById('resultDisplay')?.textContent;
+            
+            if (!result) {
+                showToast('error', 'No result to speak');
+                return;
+            }
+            
+            if ('speechSynthesis' in window) {
+                try {
+                    const utterance = new SpeechSynthesisUtterance(result);
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 1.0;
+                    
+                    speechSynthesis.speak(utterance);
+                    showToast('success', 'Speaking result...');
+                    
+                } catch (error) {
+                    console.error('❌ Speech synthesis error:', error);
+                    showToast('error', 'Speech synthesis failed');
+                }
+            } else {
+                showToast('error', 'Speech synthesis not supported in this browser');
+            }
+        }
+
+        function downloadHistory() {
+            if (calculationHistory.length === 0) {
+                showToast('error', 'No history to download');
+                return;
+            }
+            
+            try {
+                const headers = ['Expression', 'Result', 'Timestamp', 'Success'];
+                const csvContent = [
+                    headers.join(','),
+                    ...calculationHistory.map(entry => [
+                        `"${entry.expression}"`,
+                        `"${entry.result}"`,
+                        `"${entry.timestamp}"`,
+                        entry.success ? 'Yes' : 'No'
+                    ].join(','))
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `gesticalc_history_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showToast('success', 'History downloaded successfully!');
+                } else {
+                    throw new Error('Download not supported');
+                }
+                
+            } catch (error) {
+                console.error('❌ Download error:', error);
+                showToast('error', 'Failed to download history');
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.querySelector('.dark-mode-toggle i');
+            
+            if (icon) {
+                icon.classList.toggle('fa-moon');
+                icon.classList.toggle('fa-sun');
+            }
+            
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            
+            showToast('success', `${isDark ? 'Dark' : 'Light'} mode enabled`);
+        }
+
+        // ==================== EVENT HANDLERS ====================
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(event) {
+                // Ctrl/Cmd + Enter = Calculate
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    calculateManual();
+                }
+                
+                // Ctrl/Cmd + Delete = Clear
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Delete') {
+                    event.preventDefault();
+                    clearCalculator();
+                }
+                
+                // Escape = Stop camera
+                if (event.key === 'Escape') {
+                    if (cameraActive) {
+                        stopCamera();
+                    }
+                }
+            });
+            
+            console.log('⌨️ Keyboard shortcuts enabled');
+        }
+
+        function setupTabHandlers() {
+            const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function(event) {
+                    const targetTab = event.target.getAttribute('data-bs-target');
+                    uiState.currentTab = targetTab.replace('#', '');
+                    
+                    if (uiState.currentTab === 'analytics') {
+                        setTimeout(() => {
+                            updateAnalytics();
+                        }, 100);
+                    }
+                    
+                    console.log(`📑 Switched to tab: ${uiState.currentTab}`);
+                });
+            });
+        }
+
+        function setupTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function setupAutoRefresh() {
+            // Auto-refresh history and analytics every 30 seconds
+            setInterval(() => {
+                if (!uiState.isProcessing && uiState.connectionStatus === 'connected') {
+                    loadHistory();
+                    updateAnalytics();
+                }
+            }, 30000);
+            
+            // Check server connection every minute
+            setInterval(() => {
+                checkServerConnection();
+            }, 60000);
+            
+            console.log('🔄 Auto-refresh enabled');
+        }
+
+        // Load dark mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                const icon = document.querySelector('.dark-mode-toggle i');
+                if (icon) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            }
+        });
+
+        console.log('📱 GestiCalc JavaScript loaded successfully!');
+    </script>
+
+    <!-- ✅ DISPLAY UPDATE FIX - Add this right before </body> -->
+<script>
+// Force immediate display updates after any calculation
+function forceDisplayUpdate() {
+    fetch('/api/current_state')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Update expression
+                const exprEl = document.getElementById('expressionDisplay');
+                if (exprEl) {
+                    exprEl.textContent = data.expression ? `Expression: ${data.expression}` : 'Expression: None';
+                }
+                
+                // Update result
+                const resultEl = document.getElementById('resultDisplay');
+                if (resultEl) {
+                    resultEl.textContent = data.result ? `Result: ${data.result}` : 'Result: None';
+                    resultEl.classList.toggle('error', String(data.result).startsWith('Error'));
+                }
+                
+                // Update gesture
+                const gestureEl = document.querySelector('.gesture-value');
+                if (gestureEl) {
+                    gestureEl.textContent = data.gesture || 'None';
+                }
+                
+                console.log('✅ Display updated:', data);
+            }
+        })
+        .catch(e => console.log('Update skipped:', e));
+}
+
+// Override existing calculateManual
+const origCalcManual = window.calculateManual;
+if (origCalcManual) {
+    window.calculateManual = async function() {
+        await origCalcManual();
+        setTimeout(forceDisplayUpdate, 200);
+    };
+}
+
+// Override existing calculateExpression
+const origCalcExpr = window.calculateExpression;
+if (origCalcExpr) {
+    window.calculateExpression = async function() {
+        await origCalcExpr();
+        setTimeout(forceDisplayUpdate, 200);
+    };
+}
+
+// Auto-update every 500ms
+setInterval(forceDisplayUpdate, 500);
+
+console.log('✅ Display update fix loaded!');
+</script>
+
+</body>
+</html>
+
+</body>
+</html>

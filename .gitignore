@@ -1,0 +1,11 @@
+hand_calculator_env/
+.venv/
+__pycache__/
+dist/
+build/
+*.pyc
+*.pyd
+hand_calculator_env/ 
+.venv/ 
+__pycache__/ 
+dist/ 
